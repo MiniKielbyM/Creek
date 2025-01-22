@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: white;
+            color: #757575; /* Set all text to grey */
+        }
+        header, footer {
+            background-color: white; /* Set header and footer background to white */
+            color: #d32f2f; /* Set header and footer text color to red */
+            text-align: center;
+            padding: 1em 0;
+            border-top: 2px solid #d32f2f; /* Add red accent border */
+            border-bottom: 2px solid #d32f2f; /* Add red accent border */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 -8px 16px rgba(0, 0, 0, 0.3); /* Add shadow to top and bottom */
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+        }
+        .card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45vh;
+            height: 45vh;
+            margin: 20px;
+            background-color: white;
+            color: #757575; /* Set card text to grey */
+            text-decoration: none;
+            font-size: 1.5em;
+            transition: background-color 0.3s, color 0.3s;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 -8px 16px rgba(0, 0, 0, 0.3); /* Add shadow to top and bottom */
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .card .top-border {
+            position: absolute;
+            top: 0;
+            left: 0%;
+            width: 100%;
+            height: 20px;
+            background-color: #d32f2f;
+            transition: background-color 0.3s;
+        }
+        .card:hover .top-border {
+            background-color: white;
+        }
+        .card img {
+            margin-bottom: 10px;
+        }
+        .card:hover {
+            background-color: #d32f2f;
+            color: white;
+        }
+        footer p {
+            color: #757575; /* Ensure footer text is grey */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Your Logo</h1>
+    </header>
+    <div class="container">
+        <a href="#" class="card">
+            <div class="top-border"></div>
+            <img src="field.png" alt="Create Field Icon" width="75%" height="37.65957447%">
+            Create a Field
+        </a>
+        <a href="#" class="card">
+            <div class="top-border"></div>
+            <img src="create_autonomous_icon.png" alt="Create Autonomous Icon" width="50" height="50">
+            Create an Autonomous
+        </a>
+    </div>
+    <footer>
+        <p>&copy; 2025 Phoebe Kielbasinski. All rights reserved.</p>
+        <p>This site is not affiliated with, endorsed by, or associated with VEX Robotics or its parent company, Innovation First International. All trademarks, logos, and content related to VEX Robotics remain the property of their respective owners.</p>
+    </footer>
+</body>
+</html>
