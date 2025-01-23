@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Grid</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="position: absolute; top: 10px; left: 10px;">
+        <label for="robotLength">Robot Length:</label>
+        <input type="number" id="robotLength" name="robotLength" min="0" step="1">
+        <br>
+        <label for="robotWidth">Robot Width:</label>
+        <input type="number" id="robotWidth" name="robotWidth" min="0" step="1">
+    </div>
+    <canvas id="gridCanvas" width="500vh" height="500vh"></canvas>
+    <script>
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const colors = ['lightgray', 'grey'];
+        const gridSize = 6;
+        const squareSize = canvas.width / gridSize;
+        function drawGrid() {
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    ctx.fillStyle = colors[(row + col) % 2];
+                    ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                }
+            }
+
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(squareSize / 2, squareSize / 2);
+            ctx.lineTo(canvas.width - squareSize / 2, squareSize / 2);
+            ctx.lineTo(canvas.width - squareSize / 2, canvas.height - squareSize / 2);
+            ctx.lineTo(squareSize / 2, canvas.height - squareSize / 2);
+            ctx.closePath();
+            ctx.stroke();
+            // Blue circle at the top center
+            ctx.strokeStyle = 'blue';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, 0, squareSize / 16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Red circle at the bottom center
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height, squareSize / 16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Plus sign in neon green at the top right corner
+            ctx.strokeStyle = '#98fc03';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - squareSize / 4, squareSize / 4 - squareSize / 8);
+            ctx.lineTo(canvas.width - squareSize / 4, squareSize / 4 + squareSize / 8);
+            ctx.moveTo(canvas.width - squareSize / 4 - squareSize / 8, squareSize / 4);
+            ctx.lineTo(canvas.width - squareSize / 4 + squareSize / 8, squareSize / 4);
+            ctx.stroke();
+
+            // Plus sign in neon green at the bottom right corner
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - squareSize / 4, canvas.height - squareSize / 4 - squareSize / 8);
+            ctx.lineTo(canvas.width - squareSize / 4, canvas.height - squareSize / 4 + squareSize / 8);
+            ctx.moveTo(canvas.width - squareSize / 4 - squareSize / 8, canvas.height - squareSize / 4);
+            ctx.lineTo(canvas.width - squareSize / 4 + squareSize / 8, canvas.height - squareSize / 4);
+            ctx.stroke();
+
+            // Minus sign in neon green at the top left corner
+            ctx.beginPath();
+            ctx.moveTo(squareSize / 4 - squareSize / 8, squareSize / 4);
+            ctx.lineTo(squareSize / 4 + squareSize / 8, squareSize / 4);
+            ctx.stroke();
+
+            // Minus sign in neon green at the bottom left corner
+            ctx.beginPath();
+            ctx.moveTo(squareSize / 4 - squareSize / 8, canvas.height - squareSize / 4);
+            ctx.lineTo(squareSize / 4 + squareSize / 8, canvas.height - squareSize / 4);
+            ctx.stroke();
+
+            // Neon green circle at edge centers
+            ctx.strokeStyle = '#98fc03';
+            ctx.beginPath();
+            ctx.arc(canvas.width, canvas.height / 2, squareSize / 16, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0, canvas.height / 2, squareSize / 16, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(Math.PI / 4);
+            ctx.lineWidth = 6;
+            ctx.strokeRect(-squareSize * 0.75, -squareSize * 0.75, squareSize * 1.5, squareSize * 1.5);
+            ctx.restore();
+            function drawmogo(ctx, centerX, centerY, hexFillColor, hexStrokeColor, circleFillColor) {
+                // Draw hexagon
+                ctx.fillStyle = hexFillColor;
+                ctx.strokeStyle = hexStrokeColor;
+                ctx.lineWidth = 4;
+
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    ctx.lineTo(
+                        centerX + squareSize / 4 * Math.cos((i * Math.PI) / 3 + Math.PI / 6),
+                        centerY + squareSize / 4 * Math.sin((i * Math.PI) / 3 + Math.PI / 6)
+                    );
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw circle in the middle of the hexagon
+                ctx.fillStyle = circleFillColor;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, squareSize / 16, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            drawmogo(ctx, squareSize * 2, squareSize * 4, 'black', '#98fc03', '#98fc03');
+            drawmogo(ctx, squareSize * 4, squareSize * 4, 'black', '#98fc03', '#98fc03');
+            drawmogo(ctx, squareSize * 5, squareSize * 3, 'black', '#98fc03', '#98fc03');
+            drawmogo(ctx, squareSize * 2, squareSize * 2, 'black', '#98fc03', '#98fc03');
+            drawmogo(ctx, squareSize * 4, squareSize * 2, 'black', '#98fc03', '#98fc03');
+            function drawCircle(ctx, x, y, radius, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            function createStack(ctx, x, y, radius, pattern) {
+                const colors = {
+                    'R': 'red',
+                    'B': 'blue'
+                };
+
+                ctx.save();
+                ctx.translate(x, y);
+
+                if (pattern === 'RB') {
+                    const startAngle = Math.PI / 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius, startAngle, startAngle + Math.PI);
+                    ctx.lineTo(0, 0);
+                    ctx.fillStyle = colors[pattern[0]];
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius, startAngle + Math.PI, startAngle + 2 * Math.PI);
+                    ctx.lineTo(0, 0);
+                    ctx.fillStyle = colors[pattern[1]];
+                    ctx.fill();
+                } else if (pattern === 'BR') {
+                    const startAngle = Math.PI / 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius, startAngle, startAngle + Math.PI);
+                    ctx.lineTo(0, 0);
+                    ctx.fillStyle = colors[pattern[0]];
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius, startAngle + Math.PI, startAngle + 2 * Math.PI);
+                    ctx.lineTo(0, 0);
+                    ctx.fillStyle = colors[pattern[1]];
+                    ctx.fill();
+                } else if (pattern === 'RBRB' || pattern === 'BRBR') {
+                    ctx.rotate(Math.PI / 4);
+                    for (let i = 0; i < 4; i++) {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, radius, i * Math.PI / 2, (i + 1) * Math.PI / 2);
+                        ctx.lineTo(0, 0);
+                        ctx.fillStyle = colors[pattern[i]];
+                        ctx.fill();
+                    }
+                    ctx.rotate(-Math.PI / 4);
+                }
+
+                ctx.restore();
+            }
+
+            drawCircle(ctx, (squareSize * 2) + ((squareSize / 6) * 4.9), (squareSize * 2) + ((squareSize / 6) * 4.9), squareSize / 6, 'red');
+            drawCircle(ctx, (squareSize * 3) + ((squareSize / 6) * 1.1), (squareSize * 2) + ((squareSize / 6) * 4.9), squareSize / 6, 'red');
+            drawCircle(ctx, (squareSize * 2) + ((squareSize / 6) * 4.9), (squareSize * 3) + ((squareSize / 6) * 1.1), squareSize / 6, 'blue');
+            drawCircle(ctx, (squareSize * 3) + ((squareSize / 6) * 1.1), (squareSize * 3) + ((squareSize / 6) * 1.1), squareSize / 6, 'blue');
+            drawCircle(ctx, (squareSize * 3), (squareSize * 5.5), squareSize / 6, 'blue');
+            drawCircle(ctx, (squareSize * 3), (squareSize * 0.5), squareSize / 6, 'red');
+            drawCircle(ctx, (squareSize * 5), (squareSize * 5), squareSize / 6, 'blue');
+            drawCircle(ctx, (squareSize * 5), (squareSize * 1), squareSize / 6, 'red');
+            createStack(ctx, (squareSize * 1), (squareSize * 2), squareSize / 6, 'RB');
+            createStack(ctx, (squareSize * 5), (squareSize * 2), squareSize / 6, 'RB');
+            createStack(ctx, (squareSize * 1), (squareSize * 4), squareSize / 6, 'BR');
+            createStack(ctx, (squareSize * 5), (squareSize * 4), squareSize / 6, 'BR');
+            createStack(ctx, (squareSize * 3), (squareSize * 5), squareSize / 6, 'RB');
+            createStack(ctx, (squareSize * 3), (squareSize * 1), squareSize / 6, 'BR');
+            createStack(ctx, (squareSize * 0) + ((squareSize / 6) * 4.9), (squareSize * 2) + ((squareSize / 6) * 4.9), squareSize / 6, 'RB');
+            createStack(ctx, (squareSize * 1) + ((squareSize / 6) * 1.1), (squareSize * 2) + ((squareSize / 6) * 4.9), squareSize / 6, 'RB');
+            createStack(ctx, (squareSize * 0) + ((squareSize / 6) * 4.9), (squareSize * 3) + ((squareSize / 6) * 1.1), squareSize / 6, 'BR');
+            createStack(ctx, (squareSize * 1) + ((squareSize / 6) * 1.1), (squareSize * 3) + ((squareSize / 6) * 1.1), squareSize / 6, 'BR');
+        }
+        let cubeX = canvas.width / 2;
+        let cubeY = canvas.height / 2;
+        let cubeW = (squareSize / 23.5) * document.getElementById('robotWidth').value;
+        let cubeH = (squareSize / 23.5) * document.getElementById('robotLength').value;
+
+        document.getElementById('robotWidth').addEventListener('input', () => {
+            cubeW = (squareSize / 23.5) * document.getElementById('robotWidth').value;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawCube();
+        });
+
+        document.getElementById('robotLength').addEventListener('input', () => {
+            cubeH = (squareSize / 23.5) * document.getElementById('robotLength').value;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawCube();
+        });
+
+        function drawCube() {
+            ctx.fillStyle = 'purple';
+            ctx.fillRect(cubeX - cubeW / 2, cubeY - cubeH / 2, cubeW, cubeH);
+        }
+
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            cubeX = event.clientX - rect.left;
+            cubeY = event.clientY - rect.top;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawCube();
+        });
+
+        drawCube();
+    </script>
+</body>
+
+</html>
