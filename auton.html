@@ -28,12 +28,21 @@
         <br>
         <label for="robotWidth">Robot Width:</label>
         <input type="number" id="robotWidth" name="robotWidth" min="0" step="0.001" val="17.625">
+        <br/>
+        <label for="backSensor">Back Distance Sensor?</label>
+        <input type="checkbox" id="backSensor" name="backSensor">
+        <br/>
+        <label for="sideSensors">Side Distance Sensors?</label>
+        <input type="checkbox" id="sideSensors" name="sideSensors">
+        <br/>
+        <label for="frontSensor">Front Distance Sensor?</label>
+        <input type="checkbox" id="frontSensor" name="frontSensor">
     </div>
-    <canvas id="gridCanvas" width="500vh" height="500vh"></canvas>
+    <canvas id="gridCanvas" width="500vh" height="500vh" onclick="lockBot()"></canvas>
     <script>
         const canvas = document.getElementById('gridCanvas');
         const ctx = canvas.getContext('2d');
-        const colors = ['lightgray', 'grey'];
+        const colors = ['darkgray', 'grey'];
         const gridSize = 6;
         const squareSize = canvas.width / gridSize;
         function drawGrid() {
@@ -221,7 +230,10 @@
         let cubeY = canvas.height / 2;
         let cubeW = (squareSize / 23.5) * document.getElementById('robotWidth').value;
         let cubeH = (squareSize / 23.5) * document.getElementById('robotLength').value;
-
+        let moveableBot = true;
+        function lockBot(){
+            moveableBot = !moveableBot;
+        }
         document.getElementById('robotWidth').addEventListener('input', () => {
             cubeW = (squareSize / 23.5) * document.getElementById('robotWidth').value;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -242,9 +254,11 @@
         }
 
         canvas.addEventListener('mousemove', (event) => {
-            const rect = canvas.getBoundingClientRect();
-            cubeX = event.clientX - rect.left;
-            cubeY = event.clientY - rect.top;
+            if(moveableBot){
+                const rect = canvas.getBoundingClientRect();
+                cubeX = event.clientX - rect.left;
+                cubeY = event.clientY - rect.top;
+            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawGrid();
             drawCube();
