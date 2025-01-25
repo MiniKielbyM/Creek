@@ -4,40 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Grid</title>
+    <title>Creek Autonomous Builder</title>
     <style>
         body,
         html {
             height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+
         }
 
         canvas {
             border: 1px solid black;
         }
+
+        #canvasContainer {
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-left: 5px;
+            border: 1px solid black;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            background-color: #f1f1f1;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            top: 50%;
+            left: 105%;
+            margin-left: 0;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
+    <link href="prism.css" rel="stylesheet" />
 </head>
 
 <body>
     <div style="position: absolute; top: 10px; left: 10px;">
         <label for="robotLength">Robot Length:</label>
-        <input type="number" id="robotLength" name="robotLength" min="0" step="0.001" val="17">
+        <span class="tooltip">?<span class="tooltiptext">The length of the robot in inches.</span></span>
+
+        <input type="number" id="robotLength" name="robotLength" min="0" step="0.001" value="15">
         <br>
         <label for="robotWidth">Robot Width:</label>
-        <input type="number" id="robotWidth" name="robotWidth" min="0" step="0.001" val="17.625">
+        <span class="tooltip">?<span class="tooltiptext">The width of the robot in inches.</span></span>
+
+        <input type="number" id="robotWidth" name="robotWidth" min="0" step="0.001" value="15">
         <br />
-        <label for="backSensor">Back Distance Sensor?</label>
+        <label for="wheelbase">Wheel base:</label>
+        <span class="tooltip">?<span class="tooltiptext">The distance between the shafts of the front and rear wheels.</span></span>
+        <input type="number" id="wheelbase" name="wheelbase" min="0" step="0.001">
+        <br>
+        <label for="trackWidth">Track Width:</label>
+        <span class="tooltip">?<span class="tooltiptext">The distance between the left and right wheels.</span></span>
+        <input type="number" id="trackWidth" name="trackWidth" min="0" step="0.001">
+        <br />
+        <label for="wheelcirc">Wheel Circumference:</label>
+        <span class="tooltip">?<span class="tooltiptext">The circumference of the wheels in inches.</span></span>
+
+        <input type="number" id="wheelcirc" name="wheelcirc" min="0" step="0.001">
+        <br />
+        <label for="backSensor">Back Distance Sensor</label>
+        <span class="tooltip">?<span class="tooltiptext">Indicates if a back distance sensor is present.</span></span>
+
         <input type="checkbox" id="backSensor" name="backSensor">
         <br />
-        <label for="sideSensors">Side Distance Sensors?</label>
+        <label for="sideSensors">Side Distance Sensors</label>
+        <span class="tooltip">?<span class="tooltiptext">Indicates if side distance sensors are present.</span></span>
+
         <input type="checkbox" id="sideSensors" name="sideSensors">
         <br />
-        <label for="frontSensor">Front Distance Sensor?</label>
+        <label for="frontSensor">Front Distance Sensor</label>
+        <span class="tooltip">?<span class="tooltiptext">Indicates if a front distance sensor is present.</span></span>
+
         <input type="checkbox" id="frontSensor" name="frontSensor">
         <br />
+
         <table id="numberTable">
             <thead>
                 <tr>
@@ -135,9 +199,11 @@
         </script>
     </div>
     <div style="position: absolute; top: 10px; right: 10px;">
-  
+
     </div>
-    <canvas id="gridCanvas" width="500vh" height="500vh" onclick="lockBot()"></canvas>
+    <div id="canvasContainer" style="display: flex; justify-content: center; align-items: center;">
+        <canvas id="gridCanvas" width="500vh" height="500vh" onclick="lockBot()"></canvas>
+    </div>
     <script>
         const canvas = document.getElementById('gridCanvas');
         const ctx = canvas.getContext('2d');
@@ -346,14 +412,23 @@
             drawGrid();
             drawCube();
         });
-
+        let robotActualX = 0;
+        let robotActualY = 0;
         function drawCube() {
-            ctx.fillStyle = 'purple';
+            if(robotActualY >4.7){
+                ctx.fillStyle = '#b03030';
+            }
+            else{
+                ctx.fillStyle = '#3030b0';
+            }
             ctx.fillRect(cubeX - cubeW / 2, cubeY - cubeH / 2, cubeW, cubeH);
+            robotActualX = cubeX / cubeW;
+            robotActualY = cubeY / cubeH;
         }
 
         canvas.addEventListener('mousemove', (event) => {
             if (moveableBot) {
+                console.log(robotActualY);
                 const rect = canvas.getBoundingClientRect();
                 cubeX = event.clientX - rect.left;
                 cubeY = event.clientY - rect.top;
@@ -363,10 +438,63 @@
             drawCube();
         });
         drawGrid();
-        drawCube();
     </script>
-    
+    <script src="prism.js"></script>
+    <div
+        style="position: fixed; overflow: scroll; max-height: 90vh; right:0; top:0; font-size: 0.725vw; width: fit-content; max-width: 30vw;">
+        <pre data-src="main.cpp"></pre>
+        <pre><code class="language-cpp">            
+
+</code></pre>
+        <script>
+            if (window.Worker) {
+                const codeWorker = new Worker('worker.js');
+
+                codeWorker.onmessage = function (e) {
+                    document.querySelector('pre code').textContent = e.data;
+                    let rightMotorValues = Array.from(document.querySelectorAll('#numberTable tbody input')).map((input, index) => `motor rightMotor${index + 1} = motor(PORT${input.value}, true);`);
+                    let leftMotorValues = Array.from(document.querySelectorAll('#leftMotorsTable tbody input')).map((input, index) => `motor leftMotor${index + 1} = motor(PORT${input.value}, true);`);
+                    let inMotorValues = Array.from(document.querySelectorAll('#liftMotorsTable tbody input')).map((input, index) => `motor liftMotor${index + 1} = motor(PORT${input.value}, true);`);
+
+                    document.querySelector('pre code').textContent += rightMotorValues.join('\n');
+                    document.querySelector('pre code').textContent += '\n' + leftMotorValues.join('\n');
+                    document.querySelector('pre code').textContent += '\n' + inMotorValues.join('\n');
+                    if (rightMotorValues.length > 0 || leftMotorValues.length > 0 || inMotorValues.length > 0) {
+                        document.querySelector('pre code').textContent += '\n'
+                    }
+                    if (rightMotorValues.length > 0) {
+                        document.querySelector('pre code').textContent += '\n' + 'motor_group rightMotors = motor_group(' + rightMotorValues.map((_, index) => `rightMotor${index}`).join(', ') + ');';
+
+                    }
+                    if (leftMotorValues.length > 0) {
+                        document.querySelector('pre code').textContent += '\n' + 'motor_group leftMotors = motor_group(' + leftMotorValues.map((_, index) => `leftMotor${index}`).join(', ') + ');';
+                    }
+                    if (inMotorValues.length > 0) {
+                        document.querySelector('pre code').textContent += '\n' + 'motor_group liftMotors = motor_group(' + inMotorValues.map((_, index) => `liftMotor${index}`).join(', ') + ');';
+                    }
+                    if (rightMotorValues.length > 0 && leftMotorValues.length > 0) {
+                        document.querySelector('pre code').textContent += '\n\n'
+                        document.querySelector('pre code').textContent += 'drive driveTrain = drive(leftMotors, rightMotors, '+ document.getElementById("wheelcirc").value + ", " + document.getElementById("wheelbase").value + ", " + document.getElementById("trackWidth").value +', inches);';
+                    }
+                    document.querySelector('pre code').textContent += `
+void pre_auton(void)
+{
+  return;
+}
+  
+void autonomous(void)
+{`;
+                    document.querySelector('pre code').textContent += `
+    wait(20, msec);
+}
+                    `;
+                    Prism.highlightAll();
+                };
+
+                codeWorker.postMessage('start');
+            }
+        </script>
+    </div>
 </body>
 
 </html>
-
