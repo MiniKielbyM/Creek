@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creek Autonomous Builder</title>
+    <title>Creek - Autonomous</title>
     <style>
         body,
         html {
             height: 100%;
-
+            overflow: hidden;
         }
 
         canvas {
@@ -66,25 +66,68 @@
         <label for="robotLength">Robot Length:</label>
         <span class="tooltip">?<span class="tooltiptext">The length of the robot in inches.</span></span>
 
-        <input type="number" id="robotLength" name="robotLength" min="0" step="0.001" value="15">
+        <input type="number" id="robotLength" name="robotLength" min="1" step="0.001" value="15">
         <br>
         <label for="robotWidth">Robot Width:</label>
         <span class="tooltip">?<span class="tooltiptext">The width of the robot in inches.</span></span>
 
-        <input type="number" id="robotWidth" name="robotWidth" min="0" step="0.001" value="15">
+        <input type="number" id="robotWidth" name="robotWidth" min="1" step="0.001" value="15">
+
+        <br />
+        <label for="placementAngle">Placement Angle:</label>
+        <span class="tooltip">?<span class="tooltiptext">The angle at which the robot will be placed.</span></span>
+        <input type="range" id="placementAngle" name="placementAngle" min="-1" max="361" value="0"
+            oninput="updateAngleDisplay(this.value,this)">
+        <span id="angleDisplay">0°</span>
+        <br>
+        <label for="robotX">Robot X Position:</label>
+        <input type="range" id="robotX" name="robotX" min="0" max="500" value="250"
+            oninput="updatePositionDisplay(this.value, 'x')">
+        <span id="xPositionDisplay">250</span>
+        <br>
+        <label for="robotY">Robot Y Position:</label>
+        <input type="range" id="robotY" name="robotY" min="0" max="500" value="250"
+            oninput="updatePositionDisplay(this.value, 'y')">
+        <span id="yPositionDisplay">250</span>
+        <script>
+            function updateAngleDisplay(value, obj) {
+                if (value == 361) {
+                    obj.value = 0;
+                    value = 0;
+                }
+                if (value == -1) {
+                    obj.value = 360;
+                    value = 360;
+                }
+                document.getElementById('angleDisplay').textContent = value + '°';
+            }
+
+            function updatePositionDisplay(value, axis) {
+                document.getElementById(axis + 'PositionDisplay').textContent = value;
+                if (axis === 'x') {
+                    cubeX = value;
+                } else if (axis === 'y') {
+                    cubeY = value;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid();
+                drawCube();
+            }
+        </script>
         <br />
         <label for="wheelbase">Wheel base:</label>
-        <span class="tooltip">?<span class="tooltiptext">The distance between the shafts of the front and rear wheels.</span></span>
-        <input type="number" id="wheelbase" name="wheelbase" min="0" step="0.001">
+        <span class="tooltip">?<span class="tooltiptext">The distance between the shafts of the front and rear
+                wheels.</span></span>
+        <input type="number" id="wheelbase" name="wheelbase" min="1" step="0.001" value="12.60">
         <br>
         <label for="trackWidth">Track Width:</label>
         <span class="tooltip">?<span class="tooltiptext">The distance between the left and right wheels.</span></span>
-        <input type="number" id="trackWidth" name="trackWidth" min="0" step="0.001">
+        <input type="number" id="trackWidth" name="trackWidth" min="1" step="0.001" value="12.60">
         <br />
         <label for="wheelcirc">Wheel Circumference:</label>
         <span class="tooltip">?<span class="tooltiptext">The circumference of the wheels in inches.</span></span>
 
-        <input type="number" id="wheelcirc" name="wheelcirc" min="0" step="0.001">
+        <input type="number" id="wheelcirc" name="wheelcirc" min="1" step="0.001" value="12.60">
         <br />
         <label for="backSensor">Back Distance Sensor</label>
         <span class="tooltip">?<span class="tooltiptext">Indicates if a back distance sensor is present.</span></span>
@@ -197,12 +240,54 @@
                 }
             }
         </script>
-    </div>
-    <div style="position: absolute; top: 10px; right: 10px;">
 
+<br/>
+    <select id="mogoIntakeType">
+        <option value="Pneumatic">Pneumatic</option>
+        <option value="Motor">Motor</option>
+    </select>
+    <br />
+
+        <table id="selectTable">
+            <thead>
+                <tr>
+                    
+                </tr>
+                <tr>
+                    <th>MoGo Intakes</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button onclick="addSelectRow()">+</button>
+        <button onclick="removeSelectRow()">-</button>
+
+        <script>
+            function addSelectRow() {
+                const table = document.getElementById('selectTable').getElementsByTagName('tbody')[0];
+                const newRow = table.insertRow();
+                const newCell = newRow.insertCell(0);
+                const select = document.createElement('select');
+                ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.text = optionValue;
+                    select.appendChild(option);
+                });
+                newCell.appendChild(select);
+            }
+
+            function removeSelectRow() {
+                const table = document.getElementById('selectTable').getElementsByTagName('tbody')[0];
+                if (table.rows.length > 0) {
+                    table.deleteRow(-1);
+                }
+            }
+        </script>
     </div>
     <div id="canvasContainer" style="display: flex; justify-content: center; align-items: center;">
-        <canvas id="gridCanvas" width="500vh" height="500vh" onclick="lockBot()"></canvas>
+        <canvas id="gridCanvas" width="500cqh" height="500cqh" onclick="lockBot()"></canvas>
     </div>
     <script>
         const canvas = document.getElementById('gridCanvas');
@@ -415,17 +500,33 @@
         let robotActualX = 0;
         let robotActualY = 0;
         function drawCube() {
-            if(robotActualY >4.7){
+            ctx.save();
+            ctx.translate(cubeX, cubeY);
+            ctx.rotate(document.getElementById('placementAngle').value * Math.PI / 180);
+            if (robotActualY > 4.7) {
                 ctx.fillStyle = '#b03030';
-            }
-            else{
+            } else {
                 ctx.fillStyle = '#3030b0';
             }
-            ctx.fillRect(cubeX - cubeW / 2, cubeY - cubeH / 2, cubeW, cubeH);
+            ctx.fillRect(-cubeW / 2, -cubeH / 2, cubeW, cubeH);
+
+            // Draw yellow line to mark the front of the bot
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -cubeH / 2);
+            ctx.lineTo(0, 0);
+            ctx.stroke();
+
+            ctx.restore();
             robotActualX = cubeX / cubeW;
             robotActualY = cubeY / cubeH;
         }
-
+        document.getElementById('placementAngle').addEventListener('input', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawCube();
+        });
         canvas.addEventListener('mousemove', (event) => {
             if (moveableBot) {
                 console.log(robotActualY);
@@ -437,46 +538,57 @@
             drawGrid();
             drawCube();
         });
+        canvas.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const angleInput = document.getElementById('placementAngle');
+            let newAngle = parseInt(angleInput.value) + (event.deltaY > 0 ? 1 : -1);
+            if (newAngle > 360) newAngle = 0;
+            if (newAngle < 0) newAngle = 360;
+            angleInput.value = newAngle;
+            updateAngleDisplay(newAngle, angleInput);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawCube();
+        });
         drawGrid();
     </script>
     <script src="prism.js"></script>
-    <div
+    <pre data-src="main.cpp"></pre>
+    <pre
         style="position: fixed; overflow: scroll; max-height: 90vh; right:0; top:0; font-size: 0.725vw; width: fit-content; max-width: 30vw;">
-        <pre data-src="main.cpp"></pre>
-        <pre><code class="language-cpp">            
+            <code class="language-cpp"></code>
+        </pre>
+    <script>
+        if (window.Worker) {
+            const codeWorker = new Worker('worker.js');
 
-</code></pre>
-        <script>
-            if (window.Worker) {
-                const codeWorker = new Worker('worker.js');
+            codeWorker.onmessage = function (e) {
+                document.querySelector('pre code').textContent = e.data;
+                let rightMotorValues = Array.from(document.querySelectorAll('#numberTable tbody input')).map((input, index) => `motor rightMotor${index + 1} = motor(PORT${input.value}, true);`);
+                let leftMotorValues = Array.from(document.querySelectorAll('#leftMotorsTable tbody input')).map((input, index) => `motor leftMotor${index + 1} = motor(PORT${input.value}, true);`);
+                let inMotorValues = Array.from(document.querySelectorAll('#liftMotorsTable tbody input')).map((input, index) => `motor liftMotor${index + 1} = motor(PORT${input.value}, true);`);
 
-                codeWorker.onmessage = function (e) {
-                    document.querySelector('pre code').textContent = e.data;
-                    let rightMotorValues = Array.from(document.querySelectorAll('#numberTable tbody input')).map((input, index) => `motor rightMotor${index + 1} = motor(PORT${input.value}, true);`);
-                    let leftMotorValues = Array.from(document.querySelectorAll('#leftMotorsTable tbody input')).map((input, index) => `motor leftMotor${index + 1} = motor(PORT${input.value}, true);`);
-                    let inMotorValues = Array.from(document.querySelectorAll('#liftMotorsTable tbody input')).map((input, index) => `motor liftMotor${index + 1} = motor(PORT${input.value}, true);`);
+                document.querySelector('pre code').textContent += rightMotorValues.join('\n');
+                document.querySelector('pre code').textContent += '\n' + leftMotorValues.join('\n');
+                document.querySelector('pre code').textContent += '\n' + inMotorValues.join('\n');
+                if (rightMotorValues.length > 0 || leftMotorValues.length > 0 || inMotorValues.length > 0) {
+                    document.querySelector('pre code').textContent += '\n'
+                }
+                if (rightMotorValues.length > 0) {
+                    document.querySelector('pre code').textContent += '\n' + 'motor_group rightMotors = motor_group(' + rightMotorValues.map((_, index) => `rightMotor${index}`).join(', ') + ');';
 
-                    document.querySelector('pre code').textContent += rightMotorValues.join('\n');
-                    document.querySelector('pre code').textContent += '\n' + leftMotorValues.join('\n');
-                    document.querySelector('pre code').textContent += '\n' + inMotorValues.join('\n');
-                    if (rightMotorValues.length > 0 || leftMotorValues.length > 0 || inMotorValues.length > 0) {
-                        document.querySelector('pre code').textContent += '\n'
-                    }
-                    if (rightMotorValues.length > 0) {
-                        document.querySelector('pre code').textContent += '\n' + 'motor_group rightMotors = motor_group(' + rightMotorValues.map((_, index) => `rightMotor${index}`).join(', ') + ');';
-
-                    }
-                    if (leftMotorValues.length > 0) {
-                        document.querySelector('pre code').textContent += '\n' + 'motor_group leftMotors = motor_group(' + leftMotorValues.map((_, index) => `leftMotor${index}`).join(', ') + ');';
-                    }
-                    if (inMotorValues.length > 0) {
-                        document.querySelector('pre code').textContent += '\n' + 'motor_group liftMotors = motor_group(' + inMotorValues.map((_, index) => `liftMotor${index}`).join(', ') + ');';
-                    }
-                    if (rightMotorValues.length > 0 && leftMotorValues.length > 0) {
-                        document.querySelector('pre code').textContent += '\n\n'
-                        document.querySelector('pre code').textContent += 'drive driveTrain = drive(leftMotors, rightMotors, '+ document.getElementById("wheelcirc").value + ", " + document.getElementById("wheelbase").value + ", " + document.getElementById("trackWidth").value +', inches);';
-                    }
-                    document.querySelector('pre code').textContent += `
+                }
+                if (leftMotorValues.length > 0) {
+                    document.querySelector('pre code').textContent += '\n' + 'motor_group leftMotors = motor_group(' + leftMotorValues.map((_, index) => `leftMotor${index}`).join(', ') + ');';
+                }
+                if (inMotorValues.length > 0) {
+                    document.querySelector('pre code').textContent += '\n' + 'motor_group liftMotors = motor_group(' + inMotorValues.map((_, index) => `liftMotor${index}`).join(', ') + ');';
+                }
+                if (rightMotorValues.length > 0 && leftMotorValues.length > 0) {
+                    document.querySelector('pre code').textContent += '\n\n'
+                    document.querySelector('pre code').textContent += 'drive driveTrain = drive(leftMotors, rightMotors, ' + document.getElementById("wheelcirc").value + ", " + document.getElementById("wheelbase").value + ", " + document.getElementById("trackWidth").value + ', inches);';
+                }
+                document.querySelector('pre code').textContent += `
 void pre_auton(void)
 {
   return;
@@ -484,16 +596,16 @@ void pre_auton(void)
   
 void autonomous(void)
 {`;
-                    document.querySelector('pre code').textContent += `
+                document.querySelector('pre code').textContent += `
     wait(20, msec);
 }
                     `;
-                    Prism.highlightAll();
-                };
+                Prism.highlightAll();
+            };
 
-                codeWorker.postMessage('start');
-            }
-        </script>
+            codeWorker.postMessage('start');
+        }
+    </script>
     </div>
 </body>
 
