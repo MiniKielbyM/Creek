@@ -8,7 +8,8 @@ self.onmessage = function(e) {
 
 function updateCodeElement() {
     setInterval(() => {
-    self.postMessage(`#include "vex.h"
+    self.postMessage(`
+#include "vex.h"
 
 using namespace vex;
 
@@ -20,5 +21,5 @@ brain Brain;
 
 vex::controller Controller1 = controller(primary);
 `);
-    }, 1000); // Update every second
+    }, 1); // Update every second
 }
